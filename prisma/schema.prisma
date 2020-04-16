@@ -1,0 +1,311 @@
+// output   = "../src/generated/client"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model bridge_types {
+  confirmations            Int?
+  incoming_token_hash      String?
+  minimum_contract_payment String?
+  name                     String  @id
+  outgoing_token           String?
+  salt                     String?
+  url                      String?
+}
+
+model configurations {
+  created_at DateTime?
+  deleted_at DateTime?
+  id         Int       @default(autoincrement()) @id
+  name       String    @unique
+  updated_at DateTime?
+  value      String
+
+  @@index([deleted_at], name: "idx_configurations_deleted_at")
+  @@index([name], name: "idx_configurations_name")
+}
+
+model encrypted_secret_keys {
+  public_key String  @id
+  vrf_key    String?
+}
+
+model encumbrances {
+  // This type is currently not supported.
+  // agg_fulfill_selector      binary
+  // This type is currently not supported.
+  // agg_initiate_job_selector binary
+  aggregator         String
+  end_at             DateTime?
+  expiration         Int?
+  id                 Int                  @default(autoincrement()) @id
+  oracles            String?
+  payment            String?
+  service_agreements service_agreements[]
+}
+
+model external_initiators {
+  access_key      String
+  created_at      DateTime?
+  deleted_at      DateTime?
+  hashed_secret   String
+  id              Int       @default(autoincrement()) @id
+  name            String    @unique
+  outgoing_secret String
+  outgoing_token  String
+  salt            String
+  updated_at      DateTime?
+  url             String?
+
+  @@index([deleted_at], name: "idx_external_initiators_deleted_at")
+}
+
+model heads {
+  // This type is currently not supported.
+  // hash binary
+  id     Int @default(autoincrement()) @id
+  number Int
+
+  @@index([number], name: "idx_heads_number")
+}
+
+model initiators {
+  // This type is currently not supported.
+  // address       binary?
+  created_at       DateTime?
+  deleted_at       DateTime?
+  feeds            String?
+  from_block       Float?
+  id               Int        @default(autoincrement()) @id
+  idle_threshold   Int?
+  job_spec_id      String?
+  name             String?
+  params           String?
+  polling_interval Int?
+  precision        Int?
+  ran              Boolean?
+  request_data     String?
+  requesters       String?
+  schedule         String?
+  threshold        Float?
+  time             DateTime?
+  to_block         Float?
+  topics           String?
+  type             String
+  job_specs        job_specs? @relation(fields: [job_spec_id], references: [id])
+
+  @@index([created_at], name: "idx_initiators_created_at")
+  @@index([deleted_at], name: "idx_initiators_deleted_at")
+  @@index([job_spec_id], name: "idx_initiators_job_spec_id")
+  @@index([type], name: "idx_initiators_type")
+}
+
+model job_runs {
+  created_at      DateTime?
+  creation_height Float?
+  deleted_at      DateTime?
+  finished_at     DateTime?
+  id              String      @id
+  initiator_id    Int
+  job_spec_id     String?
+  observed_height Float?
+  overrides_id    Int?
+  payment         Float?
+  result_id       Int?
+  run_request_id  Int?
+  status          String?
+  updated_at      DateTime?
+  job_specs       job_specs?  @relation(fields: [job_spec_id], references: [id])
+  task_runs       task_runs[]
+
+  @@index([created_at], name: "idx_job_runs_created_at")
+  @@index([deleted_at], name: "idx_job_runs_deleted_at")
+  @@index([finished_at], name: "idx_job_runs_finished_at")
+  @@index([initiator_id], name: "idx_job_runs_initiator_id")
+  @@index([job_spec_id], name: "idx_job_runs_job_spec_id")
+  @@index([result_id], name: "idx_job_runs_result_id")
+  @@index([run_request_id], name: "idx_job_runs_run_request_id")
+  @@index([status], name: "idx_job_runs_status")
+  @@index([updated_at], name: "idx_job_runs_updated_at")
+}
+
+model job_specs {
+  created_at         DateTime?
+  deleted_at         DateTime?
+  end_at             DateTime?
+  id                 String               @id
+  min_payment        String?
+  start_at           DateTime?
+  initiators         initiators[]
+  job_runs           job_runs[]
+  service_agreements service_agreements[]
+  task_specs         task_specs[]
+
+  @@index([created_at], name: "idx_job_specs_created_at")
+  @@index([deleted_at], name: "idx_job_specs_deleted_at")
+  @@index([end_at], name: "idx_job_specs_end_at")
+  @@index([start_at], name: "idx_job_specs_start_at")
+}
+
+model keys {
+  address String  @id
+  json    String?
+}
+
+model log_cursors {
+  block_index Int
+  initialized Boolean
+  log_index   Int
+  name        String  @id
+}
+
+model migrations {
+  id String @id
+}
+
+// This type is currently not supported.
+// tx_hash     binary?
+model run_requests {
+  // This type is currently not supported.
+  // block_hash  binary?
+  created_at     DateTime?
+  id             Int       @default(autoincrement()) @id
+  payment        Float?
+  // This type is currently not supported.
+  // requester   binary?
+  request_id     String?
+  request_params String    @default("{}")
+
+  @@index([created_at], name: "idx_run_requests_created_at")
+}
+
+model run_results {
+  data          String?
+  error_message String?
+  id            Int     @default(autoincrement()) @id
+  status        String?
+}
+
+model service_agreements {
+  created_at     DateTime?
+  encumbrance_id Int?
+  id             String        @id
+  job_spec_id    String?
+  request_body   String?
+  signature      String?
+  encumbrances   encumbrances? @relation(fields: [encumbrance_id], references: [id])
+  job_specs      job_specs?    @relation(fields: [job_spec_id], references: [id])
+
+  @@index([created_at], name: "idx_service_agreements_created_at")
+}
+
+model sessions {
+  created_at DateTime?
+  id         String    @id
+  last_used  DateTime?
+
+  @@index([created_at], name: "idx_sessions_created_at")
+  @@index([last_used], name: "idx_sessions_last_used")
+}
+
+model sync_events {
+  body       String?
+  created_at DateTime?
+  id         Int       @default(autoincrement()) @id
+  updated_at DateTime?
+
+  @@index([id, created_at], name: "sync_events_id_created_at_idx")
+}
+
+model task_runs {
+  confirmations               Int?
+  confirmations_old1560433987 Int       @default(0)
+  created_at                  DateTime?
+  id                          String    @id
+  job_run_id                  String?
+  minimum_confirmations       Int?
+  result_id                   Int?
+  status                      String?
+  task_spec_id                Int?
+  job_runs                    job_runs? @relation(fields: [job_run_id], references: [id])
+
+  @@index([created_at], name: "idx_task_runs_created_at")
+  @@index([job_run_id], name: "idx_task_runs_job_run_id")
+  @@index([result_id], name: "idx_task_runs_result_id")
+  @@index([task_spec_id], name: "idx_task_runs_task_spec_id")
+}
+
+model task_specs {
+  confirmations Int?
+  created_at    DateTime?
+  deleted_at    DateTime?
+  id            Int        @default(autoincrement()) @id
+  job_spec_id   String?
+  params        String?
+  type          String
+  updated_at    DateTime?
+  job_specs     job_specs? @relation(fields: [job_spec_id], references: [id])
+
+  @@index([created_at], name: "idx_task_specs_created_at")
+  @@index([deleted_at], name: "idx_task_specs_deleted_at")
+  @@index([job_spec_id], name: "idx_task_specs_job_spec_id")
+  @@index([type], name: "idx_task_specs_type")
+  @@index([updated_at], name: "idx_task_specs_updated_at")
+}
+
+model tx_attempts {
+  confirmed     Boolean
+  created_at    DateTime
+  gas_price     String
+  // This type is currently not supported.
+  // hash       binary
+  id            Int      @default(autoincrement()) @id
+  sent_at       Int
+  signed_raw_tx String
+  tx_id         Int?
+  txes          txes?    @relation(fields: [tx_id], references: [id])
+
+  @@index([created_at], name: "idx_tx_attempts_created_at")
+  @@index([tx_id], name: "idx_tx_attempts_tx_id")
+}
+
+model txes {
+  confirmed     Boolean
+  // This type is currently not supported.
+  // data       binary
+  // This type is currently not supported.
+  // from       binary
+  gas_limit     Int
+  gas_price     String
+  // This type is currently not supported.
+  // hash       binary
+  id            Int           @default(autoincrement()) @id
+  nonce         Int
+  sent_at       Int
+  signed_raw_tx String
+  surrogate_id  String?       @unique
+  // This type is currently not supported.
+  // to         binary
+  value         String
+  tx_attempts   tx_attempts[]
+
+  @@index([nonce], name: "idx_txes_nonce")
+  @@index([surrogate_id], name: "idx_txes_surrogate_id")
+}
+
+model users {
+  created_at          DateTime?
+  email               String    @id
+  hashed_password     String?
+  token_hashed_secret String?
+  token_key           String?
+  token_salt          String?
+  token_secret        String?
+
+  @@index([created_at], name: "idx_users_created_at")
+}
