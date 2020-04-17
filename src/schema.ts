@@ -1,15 +1,8 @@
+import { withFilter } from 'apollo-server'
+
 import { nexusPrismaPlugin } from 'nexus-prisma'
 import { idArg, makeSchema, objectType, stringArg, subscriptionField, intArg } from 'nexus'
 import { transformSchemaFederation } from 'graphql-transform-federation';
-import Web3 from "web3";
-
-if (process.env.NODE_ENV === 'development') {
-    require('dotenv').config();
-}
-
-const ETH_RPC = process.env.INFURA_ROPSTEN_WSS
-console.debug(ETH_RPC)
-const web3 = new Web3(ETH_RPC);
 
 const Operator = objectType({
     name: 'Operator',
@@ -72,40 +65,32 @@ const Query = objectType({
 const ContractSubscription = subscriptionField('ContractSubscription', {
     type: 'Event',
     args: {
-        address: stringArg({ required: true }),
-        name: stringArg({ required: true }),
-        fromBlock: intArg({ default: 0 }),
-        max: intArg({ default: 0 })
+        address: stringArg(),
+        event: stringArg(),
     },
     description: 'Subscribe to Contract Events.',
-    subscribe: async (_, { address, name, fromBlock, max }, { pubsub, prisma }) => { //_, args, context
-
-        console.debug(prisma)
-
+    subscribe: withFilter(
+        (_, args, { pubsub, prisma }) => pubsub.asyncIterator("CONTRACT_EVENT"),
+        async (payload, { address, event }, { pubsub, prisma }) => { //_, args, context
+            return (!address || payload.address === address) &&
+                (!event || payload.event === event);
+        }),
+    resolve: async (payload, args, { pubsub, prisma }) => {
+        /**
+         * const address = payload.address
         const contract = await prisma.contract.findOne({
-            where: { address },
-            include: {
-                spec: true,
-            }
+            where: { address }
         })
-        const spec = contract.spec
+        const oracleAggregator = await prisma.oracleAggregator.findOne({
+            where: { contractAddress: address }
+        })
         console.debug(contract)
-        console.debug(spec)
-        const abi = JSON.parse(spec.compilerOutput).abi
-        const web3Contract = new web3.eth.Contract(abi, contract.address);
+        console.debug(oracleAggregator)
+         */
 
-        let count = 0
-        web3Contract.events[name]({ fromBlock }).on('data', (event: any) => {
-            console.debug(event)
-            if (!max || count++ < max) {
-                const returnValues = JSON.stringify(event.returnValues)
-                pubsub.publish("CONTRACT_EVENT", { ...event, returnValues });
-            }
-        })
-
-        return pubsub.asyncIterator("CONTRACT_EVENT")
-    },
-    resolve: payload => payload
+        const returnValues = JSON.stringify(payload.returnValues)
+        return { ...payload, returnValues }
+    }
 })
 
 /*
