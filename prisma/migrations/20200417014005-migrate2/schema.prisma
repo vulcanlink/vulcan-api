@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Operator {
@@ -13,18 +13,11 @@ model Operator {
   name String
 }
 
-model ContractDefinition {
-  id             Int        @default(autoincrement()) @id
-  compilerOutput String
-  contracts      Contract[]
-}
-
 model Contract {
-  address   String              @id
+  address   String      @id
   networkId String
-  events    EventType[]         @relation("EventContracts", references: [name])
-  spec      ContractDefinition? @relation(fields: [specId], references: [id])
-  specId    Int?
+  events    EventType[] @relation("EventContracts", references: [name])
+  abi       String
 }
 
 model EventType {
@@ -33,16 +26,17 @@ model EventType {
 }
 
 model Event {
-  id               String  @id
-  returnValues     String?
-  event            String?
-  signature        String?
-  logIndex         Int?
-  transactionIndex Int?
-  transactionHash  String?
-  blockHash        String?
-  blockNumber      Int?
-  address          String?
+  id               String @id
+  data             String
+  returnValues     String
+  event            String
+  signature        String
+  logIndex         Int
+  transactionIndex Int
+  transactionHash  String
+  blockHash        String
+  blockNumber      Int
+  address          String
 }
 
 model OracleAggregator {

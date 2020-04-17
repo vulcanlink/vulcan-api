@@ -1,92 +1,53 @@
 import { nexusPrismaPlugin } from 'nexus-prisma'
 import { idArg, makeSchema, objectType, stringArg, subscriptionField, intArg } from 'nexus'
+import { transformSchemaFederation } from 'graphql-transform-federation';
+import Web3 from "web3";
 
-const bridgeTypes = objectType({
-    name: 'bridge_types',
+if (process.env.NODE_ENV === 'development') {
+    require('dotenv').config();
+}
+
+const ETH_RPC = process.env.INFURA_ROPSTEN_WSS
+console.debug(ETH_RPC)
+const web3 = new Web3(ETH_RPC);
+
+const Operator = objectType({
+    name: 'Operator',
     definition(t) {
         Object.values(t.model).map((field: any) => { field() })
     }
 })
 
-const externalInitiators = objectType({
-    name: 'external_initiators',
+const ContractDefinition = objectType({
+    name: 'ContractDefinition',
     definition(t) {
         Object.values(t.model).map((field: any) => { field() })
     }
 })
 
-const heads = objectType({
-    name: 'heads',
+const Contract = objectType({
+    name: 'Contract',
     definition(t) {
         Object.values(t.model).map((field: any) => { field() })
     }
 })
 
-const initiators = objectType({
-    name: 'initiators',
+const EventType = objectType({
+    name: 'EventType',
     definition(t) {
         Object.values(t.model).map((field: any) => { field() })
     }
 })
 
-const jobRuns = objectType({
-    name: 'job_runs',
+const Event = objectType({
+    name: 'Event',
     definition(t) {
         Object.values(t.model).map((field: any) => { field() })
     }
 })
 
-const jobSpecs = objectType({
-    name: 'job_specs',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
-const runRequests = objectType({
-    name: 'run_requests',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
-const runResults = objectType({
-    name: 'run_results',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
-const serviceAgreements = objectType({
-    name: 'service_agreements',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
-const taskRuns = objectType({
-    name: 'task_runs',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
-const taskSpecs = objectType({
-    name: 'task_specs',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
-const txAttempts = objectType({
-    name: 'tx_attempts',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
-const txes = objectType({
-    name: 'txes',
+const OracleAggregator = objectType({
+    name: 'OracleAggregator',
     definition(t) {
         Object.values(t.model).map((field: any) => { field() })
     }
@@ -95,20 +56,56 @@ const txes = objectType({
 const Query = objectType({
     name: 'Query',
     definition(t) {
-        t.crud.bridgeTypes();
-        t.crud.externalInitiators();
-        t.crud.heads();
-        t.crud.initiators();
-        t.crud.jobRuns();
-        t.crud.jobSpecs();
-        t.crud.runRequests();
-        t.crud.runResults();
-        t.crud.serviceAgreements();
-        t.crud.taskRuns();
-        t.crud.taskSpecs();
-        t.crud.txAttempts();
-        t.crud.txes();
+        t.crud.operator();
+        t.crud.operators();
+        t.crud.contract();
+        t.crud.contracts();
+        t.crud.eventType();
+        t.crud.eventTypes();
+        t.crud.event();
+        t.crud.events();
+        t.crud.oracleAggregator();
+        t.crud.oracleAggregators();
     },
+})
+
+const ContractSubscription = subscriptionField('ContractSubscription', {
+    type: 'Event',
+    args: {
+        address: stringArg({ required: true }),
+        name: stringArg({ required: true }),
+        fromBlock: intArg({ default: 0 }),
+        max: intArg({ default: 0 })
+    },
+    description: 'Subscribe to Contract Events.',
+    subscribe: async (_, { address, name, fromBlock, max }, { pubsub, prisma }) => { //_, args, context
+
+        console.debug(prisma)
+
+        const contract = await prisma.contract.findOne({
+            where: { address },
+            include: {
+                spec: true,
+            }
+        })
+        const spec = contract.spec
+        console.debug(contract)
+        console.debug(spec)
+        const abi = JSON.parse(spec.compilerOutput).abi
+        const web3Contract = new web3.eth.Contract(abi, contract.address);
+
+        let count = 0
+        web3Contract.events[name]({ fromBlock }).on('data', (event: any) => {
+            console.debug(event)
+            if (!max || count++ < max) {
+                const returnValues = JSON.stringify(event.returnValues)
+                pubsub.publish("CONTRACT_EVENT", { ...event, returnValues });
+            }
+        })
+
+        return pubsub.asyncIterator("CONTRACT_EVENT")
+    },
+    resolve: payload => payload
 })
 
 /*
@@ -120,22 +117,17 @@ const Mutation = objectType({
 })
 */
 
-export const schema = makeSchema({
+const schema = makeSchema({
     types: [
         Query,
-        bridgeTypes,
-        externalInitiators,
-        heads,
-        initiators,
-        jobRuns,
-        jobSpecs,
-        runRequests,
-        runResults,
-        serviceAgreements,
-        taskRuns,
-        taskSpecs,
-        txAttempts,
-        txes],
+        Operator,
+        ContractDefinition,
+        Contract,
+        EventType,
+        Event,
+        OracleAggregator,
+        ContractSubscription
+    ],
     plugins: [nexusPrismaPlugin()],
     outputs: {
         schema: __dirname + '/../schema.graphql',
@@ -155,3 +147,17 @@ export const schema = makeSchema({
         ],
     },
 })
+
+const federatedSchema = transformSchemaFederation(schema, {
+    Query: {
+        extend: true,
+    },
+    Operator: {
+        keyFields: ['id'],
+        resolveReference(reference: any) {
+            return null
+        },
+    },
+})
+
+export default federatedSchema;

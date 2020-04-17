@@ -1,6 +1,7 @@
 .env
 dist
 src/generated
+db
 ## Generated
 schema.graphql
 

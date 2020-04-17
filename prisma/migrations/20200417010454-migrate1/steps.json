@@ -1,0 +1,319 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateModel",
+      "model": "Contract"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Contract",
+      "field": "address",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Contract",
+          "field": "address"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "Contract",
+      "field": "networkId",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Contract",
+      "field": "events",
+      "type": "EventType",
+      "arity": "List"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Contract",
+          "field": "events"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Contract",
+          "field": "events"
+        },
+        "directive": "relation"
+      },
+      "argument": "",
+      "value": "\"EventContracts\""
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Contract",
+          "field": "events"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[name]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Contract",
+      "field": "abi",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateModel",
+      "model": "EventType"
+    },
+    {
+      "tag": "CreateField",
+      "model": "EventType",
+      "field": "name",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "EventType",
+          "field": "name"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "EventType",
+      "field": "contracts",
+      "type": "Contract",
+      "arity": "List"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "EventType",
+          "field": "contracts"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "EventType",
+          "field": "contracts"
+        },
+        "directive": "relation"
+      },
+      "argument": "",
+      "value": "\"EventContracts\""
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "EventType",
+          "field": "contracts"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[address]"
+    },
+    {
+      "tag": "CreateModel",
+      "model": "Event"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Event",
+      "field": "id",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Event",
+          "field": "id"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "Event",
+      "field": "data",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateModel",
+      "model": "OracleAggregator"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OracleAggregator",
+      "field": "id",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "OracleAggregator",
+          "field": "id"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OracleAggregator",
+          "field": "id"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "autoincrement()"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "OracleAggregator",
+          "field": "id"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "OracleAggregator",
+      "field": "contract",
+      "type": "Contract",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "OracleAggregator",
+          "field": "contract"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OracleAggregator",
+          "field": "contract"
+        },
+        "directive": "relation"
+      },
+      "argument": "",
+      "value": "\"OracleContracts\""
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OracleAggregator",
+          "field": "contract"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[contractAddress]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OracleAggregator",
+          "field": "contract"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[address]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OracleAggregator",
+      "field": "contractAddress",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OracleAggregator",
+      "field": "title",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OracleAggregator",
+      "field": "path",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OracleAggregator",
+      "field": "answerRenderFormat",
+      "type": "String",
+      "arity": "Required"
+    }
+  ]
+}

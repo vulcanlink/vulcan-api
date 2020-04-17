@@ -1,0 +1,183 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateModel",
+      "model": "ContractDefinition"
+    },
+    {
+      "tag": "CreateField",
+      "model": "ContractDefinition",
+      "field": "id",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "ContractDefinition",
+          "field": "id"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "ContractDefinition",
+          "field": "id"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "autoincrement()"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "ContractDefinition",
+          "field": "id"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "ContractDefinition",
+      "field": "compilerOutput",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "ContractDefinition",
+      "field": "contracts",
+      "type": "Contract",
+      "arity": "List"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Contract",
+      "field": "spec",
+      "type": "ContractDefinition",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Contract",
+          "field": "spec"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Contract",
+          "field": "spec"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[specId]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Contract",
+          "field": "spec"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Contract",
+      "field": "specId",
+      "type": "Int",
+      "arity": "Optional"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Contract",
+      "field": "abi"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Event",
+      "field": "data"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "returnValues",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "event",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "signature",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "logIndex",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "transactionIndex",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "transactionHash",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "blockHash",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "blockNumber",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Event",
+      "field": "address",
+      "arity": "Optional"
+    }
+  ]
+}
