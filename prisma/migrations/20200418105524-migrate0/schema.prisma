@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url = "***"
 }
 
@@ -48,4 +48,9 @@ model Event {
   signature                       String?
   transactionHash                 String?
   transactionIndex                Int?
+}
+
+model DiscordChannel {
+  id      String  @id
+  guildId String?
 }
