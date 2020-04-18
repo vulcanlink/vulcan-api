@@ -8,8 +8,11 @@ if (process.env.NODE_ENV === 'development') {
     require('dotenv').config();
 }
 
-const ETH_RPC = process.env.INFURA_ROPSTEN_WSS
-const web3 = new Web3(ETH_RPC);
+const MAINNET_RPC = process.env.INFURA_MAINNET_WSS
+const ROPSTEN_RPC = process.env.INFURA_ROPSTEN_WSS
+
+const web3Mainnet = new Web3(MAINNET_RPC);
+const web3Ropsten = new Web3(ROPSTEN_RPC);
 
 function sleep(ms) {
     return new Promise((resolve) => {
@@ -24,7 +27,8 @@ async function main() {
             console.log(
                 `🚀 Server ready at: http://localhost:4002`,
             )
-            console.debug(ETH_RPC)
+            console.debug(MAINNET_RPC)
+            console.debug(ROPSTEN_RPC)
         }
     )
 
@@ -32,9 +36,9 @@ async function main() {
     const { prisma, pubsub } = createContext()
     const oracleAggregators = await prisma.oracleAggregator.findMany({
         include: {
-            contract: {
+            Contract: {
                 include: {
-                    spec: true
+                    ContractDefinition: true
                 }
             },
         }
@@ -42,28 +46,36 @@ async function main() {
 
     const eventName = "AnswerUpdated"
     await Promise.allSettled(oracleAggregators.map(async (item) => {
-        const spec = item.contract.spec;
+        const spec = item.Contract.ContractDefinition;
         const abi = JSON.parse(spec.compilerOutput).abi;
-        const web3Contract = new web3.eth.Contract(abi, item.contract.address);
-        console.debug(item.contract.address)
+        const address = item.Contract.address
+        const networkId = item.Contract.networkId
+
+        let web3Contract;
+        if (networkId === '1') {
+            web3Contract = new web3Mainnet.eth.Contract(abi, address);
+        } else if (networkId === '3') {
+            web3Contract = new web3Ropsten.eth.Contract(abi, address);
+        }
+
+        console.debug(address)
 
         //Past events
-
-
-        const pastEvents = await web3Contract.getPastEvents(eventName, { fromBlock: 0, toBlock: 'latest' })
         /*
+        const pastEvents = await web3Contract.getPastEvents(eventName, { fromBlock: 0, toBlock: 'latest' })
+        
         pastEvents.forEach(async (event: any) => {
             console.debug(`Past: ${event.id}`)
             await sleep(5000)
             pubsub.publish("CONTRACT_EVENT", { ...event });
-        })*/
+        })
 
         for (let i = 0; i < pastEvents.length; i++) {
             //await sleep(5000)
             const event = pastEvents[i]
             console.debug(`Past: ${event.id}`)
             pubsub.publish("CONTRACT_EVENT", { ...event });
-        }
+        }*/
 
         //New events
         const emitter = web3Contract.events[eventName]({ fromBlock: 'latest' })

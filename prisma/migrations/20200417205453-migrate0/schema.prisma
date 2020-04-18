@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Operator {
@@ -48,9 +48,4 @@ model Event {
   signature                       String?
   transactionHash                 String?
   transactionIndex                Int?
-}
-
-model DiscordChannel {
-  id      String  @id
-  guildId String?
 }

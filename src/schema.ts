@@ -25,13 +25,6 @@ const Contract = objectType({
     }
 })
 
-const EventType = objectType({
-    name: 'EventType',
-    definition(t) {
-        Object.values(t.model).map((field: any) => { field() })
-    }
-})
-
 const Event = objectType({
     name: 'Event',
     definition(t) {
@@ -46,6 +39,13 @@ const OracleAggregator = objectType({
     }
 })
 
+const DiscordChannel = objectType({
+    name: 'DiscordChannel',
+    definition(t) {
+        Object.values(t.model).map((field: any) => { field() })
+    }
+})
+
 const Query = objectType({
     name: 'Query',
     definition(t) {
@@ -53,12 +53,12 @@ const Query = objectType({
         t.crud.operators();
         t.crud.contract();
         t.crud.contracts();
-        t.crud.eventType();
-        t.crud.eventTypes();
         t.crud.event();
         t.crud.events();
         t.crud.oracleAggregator();
         t.crud.oracleAggregators();
+        t.crud.discordChannel();
+        t.crud.discordChannels();
     },
 })
 
@@ -93,25 +93,30 @@ const ContractSubscription = subscriptionField('ContractSubscription', {
     }
 })
 
-/*
+
 const Mutation = objectType({
     name: 'Mutation',
     definition(t) {
-        //console.debug(t.crud)
+        t.crud.createOneDiscordChannel();
+        t.crud.updateOneDiscordChannel();
+        t.crud.updateManyDiscordChannel();
+        t.crud.deleteOneDiscordChannel();
+        t.crud.deleteManyDiscordChannel();
+        t.crud.upsertOneDiscordChannel();
     },
 })
-*/
 
 const schema = makeSchema({
     types: [
         Query,
+        Mutation,
         Operator,
         ContractDefinition,
         Contract,
-        EventType,
         Event,
         OracleAggregator,
-        ContractSubscription
+        ContractSubscription,
+        DiscordChannel
     ],
     plugins: [nexusPrismaPlugin()],
     outputs: {
