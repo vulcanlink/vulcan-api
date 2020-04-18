@@ -8,20 +8,20 @@ if (process.env.NODE_ENV === 'development') {
     require('dotenv').config();
 }
 
-const MAINNET_RPC = process.env.INFURA_MAINNET_WSS
-const ROPSTEN_RPC = process.env.INFURA_ROPSTEN_WSS
+const MAINNET_RPC = process.env.INFURA_MAINNET_WSS as string
+const ROPSTEN_RPC = process.env.INFURA_ROPSTEN_WSS as string
 
 const web3Mainnet = new Web3(MAINNET_RPC);
 const web3Ropsten = new Web3(ROPSTEN_RPC);
 
-function sleep(ms) {
+function sleep(ms: number) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
     });
 }
 
 async function main() {
-    new ApolloServer({ schema, context: createContext }).listen(
+    new ApolloServer({ schema, context: createContext, subscriptions: process.env.USE_SUBSCRIPTIONS }).listen(
         { port: 4002 },
         async () => {
             console.log(
@@ -46,7 +46,7 @@ async function main() {
 
     const eventName = "AnswerUpdated"
     await Promise.allSettled(oracleAggregators.map(async (item) => {
-        const spec = item.Contract.ContractDefinition;
+        const spec = item.Contract.ContractDefinition!;
         const abi = JSON.parse(spec.compilerOutput).abi;
         const address = item.Contract.address
         const networkId = item.Contract.networkId
@@ -54,11 +54,11 @@ async function main() {
         let web3Contract;
         if (networkId === '1') {
             web3Contract = new web3Mainnet.eth.Contract(abi, address);
-        } else if (networkId === '3') {
+        } else { //if (networkId === '3')
             web3Contract = new web3Ropsten.eth.Contract(abi, address);
         }
 
-        console.debug(address)
+        //console.debug(address)
 
         //Past events
         /*

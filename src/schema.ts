@@ -106,8 +106,9 @@ const Mutation = objectType({
     },
 })
 
-const schema = makeSchema({
-    types: [
+let types;
+if (process.env.USE_SUBSCRIPTIONS) {
+    types = [
         Query,
         Mutation,
         Operator,
@@ -115,10 +116,30 @@ const schema = makeSchema({
         Contract,
         Event,
         OracleAggregator,
-        ContractSubscription,
+        DiscordChannel,
+        ContractSubscription
+    ]
+} else {
+    types = [
+        Query,
+        Mutation,
+        Operator,
+        ContractDefinition,
+        Contract,
+        Event,
+        OracleAggregator,
         DiscordChannel
-    ],
-    plugins: [nexusPrismaPlugin()],
+    ]
+}
+
+
+const schema = makeSchema({
+    types,
+    plugins: [nexusPrismaPlugin({
+        outputs: {
+            typegen: __dirname + '/generated/nexus-prisma.ts',
+        }
+    })],
     outputs: {
         schema: __dirname + '/../schema.graphql',
         typegen: __dirname + '/generated/nexus.ts',
@@ -133,7 +154,7 @@ const schema = makeSchema({
             {
                 source: require.resolve('./context'),
                 alias: 'Context',
-            },
+            }
         ],
     },
 })
