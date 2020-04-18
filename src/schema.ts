@@ -4,6 +4,10 @@ import { nexusPrismaPlugin } from 'nexus-prisma'
 import { idArg, makeSchema, objectType, stringArg, subscriptionField, intArg } from 'nexus'
 import { transformSchemaFederation } from 'graphql-transform-federation';
 
+if (process.env.NODE_ENV === 'development') {
+    require('dotenv').config();
+}
+
 const Operator = objectType({
     name: 'Operator',
     definition(t) {
@@ -87,6 +91,8 @@ const ContractSubscription = subscriptionField('ContractSubscription', {
         console.debug(contract)
         console.debug(oracleAggregator)
          */
+        console.debug(args)
+        console.debug(payload)
 
         const returnValues = JSON.stringify(payload.returnValues)
         return { ...payload, returnValues }
@@ -106,32 +112,17 @@ const Mutation = objectType({
     },
 })
 
-let types;
-if (process.env.USE_SUBSCRIPTIONS) {
-    types = [
-        Query,
-        Mutation,
-        Operator,
-        ContractDefinition,
-        Contract,
-        Event,
-        OracleAggregator,
-        DiscordChannel,
-        ContractSubscription
-    ]
-} else {
-    types = [
-        Query,
-        Mutation,
-        Operator,
-        ContractDefinition,
-        Contract,
-        Event,
-        OracleAggregator,
-        DiscordChannel
-    ]
-}
-
+const types = [
+    Query,
+    Mutation,
+    Operator,
+    ContractDefinition,
+    Contract,
+    Event,
+    OracleAggregator,
+    DiscordChannel,
+    ContractSubscription
+]
 
 const schema = makeSchema({
     types,
@@ -168,7 +159,7 @@ const federatedSchema = transformSchemaFederation(schema, {
         resolveReference(reference: any) {
             return null
         },
-    },
+    }
 })
 
 export default federatedSchema;

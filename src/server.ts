@@ -21,7 +21,19 @@ function sleep(ms: number) {
 }
 
 async function main() {
-    new ApolloServer({ schema, context: createContext, subscriptions: process.env.USE_SUBSCRIPTIONS }).listen(
+    new ApolloServer({
+        schema,
+        context: createContext,
+        subscriptions: {
+            onConnect: (connectionParams, webSocket, context) => {
+                console.debug('CONNECT')
+                console.debug(connectionParams)
+            },
+            onDisconnect: (webSocket, context) => {
+                console.debug('DISCONNECT')
+            },
+        }
+    }).listen(
         { port: 4002 },
         async () => {
             console.log(
@@ -61,35 +73,35 @@ async function main() {
         //console.debug(address)
 
         //Past events
+
         /*
         const pastEvents = await web3Contract.getPastEvents(eventName, { fromBlock: 0, toBlock: 'latest' })
-        
         pastEvents.forEach(async (event: any) => {
             console.debug(`Past: ${event.id}`)
             await sleep(5000)
             pubsub.publish("CONTRACT_EVENT", { ...event });
-        })
-
+        })*/
+        /*
+        const pastEvents = await web3Contract.getPastEvents(eventName, { fromBlock: 0, toBlock: 'latest' })
         for (let i = 0; i < pastEvents.length; i++) {
-            //await sleep(5000)
+            await sleep(5000)
             const event = pastEvents[i]
             console.debug(`Past: ${event.id}`)
             pubsub.publish("CONTRACT_EVENT", { ...event });
-        }*/
+        }
+        */
 
         //New events
         const emitter = web3Contract.events[eventName]({ fromBlock: 'latest' })
         return new Promise((resolve, reject) => {
             emitter.on('data', (event: any) => {
-                console.debug(`New: ${event.id}`)
+                console.debug(`New: ${event.id} ${event.address}`)
                 pubsub.publish("CONTRACT_EVENT", { ...event });
             });
             emitter.on('end', resolve);
             emitter.on('error', reject);
         });
     }));
-
-    console.debug('DONE')
 
 }
 
