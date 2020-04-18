@@ -1,8 +1,12 @@
 {
-    "name": "api",
+    "name": "vulcan-api",
     "version": "1.0.0",
-    "description": "",
+    "description": "Vulcan Link GraphQL API Service",
     "main": "index.js",
+    "private": false,
+    "copyright": "Copyright 2020 Vulcan Link",
+    "license": "MIT",
+    "author": "Leo Vigna",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node dist/server",
@@ -14,8 +18,6 @@
         "dev": "ts-node-dev --no-notify --respawn --transpileOnly src/server"
     },
     "keywords": [],
-    "author": "",
-    "license": "ISC",
     "dependencies": {
         "@apollo/federation": "^0.14.1",
         "@nexus/schema": "^0.13.1",
