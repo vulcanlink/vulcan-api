@@ -1,15 +1,35 @@
 import { withFilter } from 'apollo-server'
 
 import { nexusPrismaPlugin } from 'nexus-prisma'
-import { idArg, makeSchema, objectType, stringArg, subscriptionField, intArg } from 'nexus'
+import { idArg, makeSchema, objectType, interfaceType, stringArg, subscriptionField, intArg } from 'nexus'
 import { transformSchemaFederation } from 'graphql-transform-federation';
+import { delegateToSchema } from 'graphql-tools';
+
 
 if (process.env.NODE_ENV === 'development') {
     require('dotenv').config();
 }
 
-const Operator = objectType({
-    name: 'Operator',
+/*
+const Node = interfaceType({
+    name: 'Node',
+    definition(t) {
+        //t.id('id', o => o.id)
+        t.resolveType(() => null)
+    },
+})
+*/
+
+const NodeOperator = objectType({
+    name: 'NodeOperator',
+    definition(t) {
+        Object.values(t.model).map((field: any) => { field() })
+    }
+})
+
+//Extend the Chainlink Object
+const JobSpec = objectType({
+    name: 'JobSpec',
     definition(t) {
         Object.values(t.model).map((field: any) => { field() })
     }
@@ -53,8 +73,8 @@ const DiscordChannel = objectType({
 const Query = objectType({
     name: 'Query',
     definition(t) {
-        t.crud.operator();
-        t.crud.operators();
+        t.crud.nodeOperator();
+        t.crud.nodeOperators();
         t.crud.contract();
         t.crud.contracts();
         t.crud.event();
@@ -63,6 +83,8 @@ const Query = objectType({
         t.crud.oracleAggregators();
         t.crud.discordChannel();
         t.crud.discordChannels();
+        //t.crud.jobSpec();
+        //t.crud.jobSpecs();
     },
 })
 
@@ -80,17 +102,6 @@ const ContractSubscription = subscriptionField('ContractSubscription', {
                 (!event || payload.event === event);
         }),
     resolve: async (payload, args, { pubsub, prisma }) => {
-        /**
-         * const address = payload.address
-        const contract = await prisma.contract.findOne({
-            where: { address }
-        })
-        const oracleAggregator = await prisma.oracleAggregator.findOne({
-            where: { contractAddress: address }
-        })
-        console.debug(contract)
-        console.debug(oracleAggregator)
-         */
         console.debug(args)
         console.debug(payload)
 
@@ -115,14 +126,15 @@ const Mutation = objectType({
 const types = [
     Query,
     Mutation,
-    Operator,
+    NodeOperator,
     ContractDefinition,
     Contract,
     Event,
     OracleAggregator,
     DiscordChannel,
-    ContractSubscription
+    JobSpec
 ]
+//ContractSubscription
 
 const schema = makeSchema({
     types,
@@ -154,12 +166,35 @@ const federatedSchema = transformSchemaFederation(schema, {
     Query: {
         extend: true,
     },
-    Operator: {
+    JobSpec: {
+        extend: true,
         keyFields: ['id'],
-        resolveReference(reference: any) {
-            return null
+        fields: {
+            id: {
+                external: true
+            }
         },
-    }
+        async resolveReference({ id }: any, { prisma }, info) {
+            return await prisma.jobSpec.findOne({ where: { id } })
+        }
+    },
+    NodeOperator: {
+        keyFields: ['id'],
+        resolveReference({ id }: any, context, info) {
+            console.debug(`Find NodeOperator ${id}`);
+            return delegateToSchema({
+                schema: info.schema,
+                operation: 'query',
+                fieldName: 'NodeOperatorWhereUniqueInput',
+                args: {
+                    where: { id },
+                },
+                //@ts-ignore
+                context,
+                info,
+            });
+        },
+    },
 })
 
 export default federatedSchema;

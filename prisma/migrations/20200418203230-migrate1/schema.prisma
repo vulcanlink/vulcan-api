@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model NodeOperator {
@@ -15,7 +15,6 @@ model NodeOperator {
 
 model JobSpec {
   id           String        @id
-  name         String?
   operatorId   Int?
   NodeOperator NodeOperator? @relation(fields: [operatorId], references: [id])
 }
