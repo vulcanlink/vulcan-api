@@ -10,15 +10,6 @@ if (process.env.NODE_ENV === 'development') {
     require('dotenv').config();
 }
 
-/*
-const Node = interfaceType({
-    name: 'Node',
-    definition(t) {
-        //t.id('id', o => o.id)
-        t.resolveType(() => null)
-    },
-})
-*/
 
 const NodeOperator = objectType({
     name: 'NodeOperator',
@@ -174,6 +165,7 @@ const federatedSchema = transformSchemaFederation(schema, {
                 external: true
             }
         },
+        //@ts-ignore
         async resolveReference({ id }: any, { prisma }, info) {
             return await prisma.jobSpec.findOne({ where: { id } })
         }
