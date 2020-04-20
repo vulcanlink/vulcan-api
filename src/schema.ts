@@ -68,6 +68,8 @@ const Query = objectType({
         t.crud.nodeOperators();
         t.crud.contract();
         t.crud.contracts();
+        t.crud.contractDefinition();
+        t.crud.contractDefinitions();
         t.crud.event();
         t.crud.events();
         t.crud.oracleAggregator();
